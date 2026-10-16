@@ -1,0 +1,10 @@
+# @package _global_
+# COCO-Search18 target-absent.
+defaults:
+  - override /data/train_datasets: [cocosearch18_edf_ta]
+  - override /data/test_datasets: [cocosearch18_edf_ta]
+
+tags: [cocosearch18_ta]
+
+trainer:
+  max_epochs: 500

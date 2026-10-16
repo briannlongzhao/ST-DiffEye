@@ -1,0 +1,11 @@
+# @package _global_
+# COCO-FreeView. Trained jointly on COCO-FreeView and MIT1003, with 1500-point trajectories.
+defaults:
+  - override /data/train_datasets: [cocofreeview_edf, mit1003_edf]
+  - override /data/test_datasets: [cocofreeview_edf]
+
+tags: [cocofreeview]
+
+data:
+  max_len_traj: 1500
+  batch_size_train: 64

@@ -1,0 +1,16 @@
+_target_: src.evaluator.Evaluator
+eval_root_path: ${paths.output_dir}
+seed: ${seed}
+# preds: generate trajectories/scanpaths, metrics: compute metrics, qualitatives: draw scanpaths on images
+data_to_extract: [preds, metrics]
+metrics_to_compute:
+  - levenshtein_distance
+  - discrete_frechet_distance
+  - dynamic_time_warping
+  - time_delay_embedding
+  - multi_match
+  - scan_match
+  - sequence_score
+  - semantic_sequence_score
+  - kld
+  - crps

@@ -1,0 +1,9 @@
+_target_: src.model.components.dit_model.DiTModel
+encoder:
+  _target_: src.model.components.autoencoder.Encoder
+  encoder_dimensions: [3, 128, 256]
+decoder:
+  _target_: src.model.components.autoencoder.Decoder
+  decoder_dimensions: [256, 128, 64, 3]
+max_len: ${data.max_len_traj}
+fixation_strategy: data_channel  # where the fixation index is concatenated: data_channel | latent_space

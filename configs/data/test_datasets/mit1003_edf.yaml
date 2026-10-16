@@ -1,0 +1,10 @@
+mit1003_edf:
+  _target_: src.data.components.mit1003.mit1003_edf.MIT1003EDFDataset
+  name: mit1003_edf
+  root_path: ${data_dir}/mit1003_edf
+  split: test
+  task_embeddings_path: ${data_dir}/task_embeddings.npy
+  max_samples: ${data.max_samples}
+  # Human consistency scores used by the sequence-score metrics.
+  threshold: 0.406
+  threshold_no_dur: 0.408

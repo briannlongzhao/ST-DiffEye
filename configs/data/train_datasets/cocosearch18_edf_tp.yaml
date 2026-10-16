@@ -1,0 +1,7 @@
+cocosearch18_edf_tp:
+  _target_: src.data.components.cocosearch18.cocosearch18_edf_tp.COCOSearch18EDFTargetPresentDataset
+  name: cocosearch18_edf_tp
+  root_path: ${data_dir}/cocosearch18_edf
+  split: train
+  task_embeddings_path: ${data_dir}/task_embeddings.npy
+  max_samples: ${data.max_samples}

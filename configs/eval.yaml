@@ -1,0 +1,24 @@
+# @package _global_
+
+defaults:
+  - _self_
+  - data: default
+  - model: dit
+  - diffusion: default
+  - evaluation: default
+  - paths: default
+  - hydra: default
+  - experiment: null  # cocosearch18_tp | cocosearch18_ta | cocofreeview | mit1003
+
+task_name: eval
+tags: [dev]
+
+# Root folder containing the dataset folders and task_embeddings.npy.
+data_dir: ${paths.root_dir}/data
+
+# Checkpoint to evaluate (required).
+ckpt_path: ???
+
+seed: 0
+
+print_config: true

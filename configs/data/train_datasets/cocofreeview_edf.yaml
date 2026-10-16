@@ -1,0 +1,7 @@
+cocofreeview_edf:
+  _target_: src.data.components.cocofreeview.cocofreeview_edf.COCOFreeviewEDFDataset
+  name: cocofreeview_edf
+  root_path: ${data_dir}/cocofreeview_edf
+  split: train
+  task_embeddings_path: ${data_dir}/task_embeddings.npy
+  max_samples: ${data.max_samples}

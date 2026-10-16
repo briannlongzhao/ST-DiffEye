@@ -1,0 +1,10 @@
+cocofreeview_edf:
+  _target_: src.data.components.cocofreeview.cocofreeview_edf.COCOFreeviewEDFDataset
+  name: cocofreeview_edf
+  root_path: ${data_dir}/cocofreeview_edf
+  split: test
+  task_embeddings_path: ${data_dir}/task_embeddings.npy
+  max_samples: ${data.max_samples}
+  # Human consistency scores used by the sequence-score metrics.
+  threshold: 0.314
+  threshold_no_dur: 0.348

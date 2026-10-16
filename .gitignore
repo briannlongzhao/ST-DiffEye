@@ -218,3 +218,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ST-DiffEye (anchored to the repo root so src/data/ is not ignored)
+/checkpoints/
+/data/
+/logs/
+/outputs/
+/wandb/

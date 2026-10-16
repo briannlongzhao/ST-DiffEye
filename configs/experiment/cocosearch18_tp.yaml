@@ -1,0 +1,7 @@
+# @package _global_
+# COCO-Search18 target-present. Trained jointly on target-present and target-absent data.
+defaults:
+  - override /data/train_datasets: [cocosearch18_edf_tp, cocosearch18_edf_ta]
+  - override /data/test_datasets: [cocosearch18_edf_tp]
+
+tags: [cocosearch18_tp]

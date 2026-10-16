@@ -1,0 +1,31 @@
+# @package _global_
+
+defaults:
+  - _self_
+  - data: default
+  - model: dit
+  - diffusion: default
+  - trainer: default
+  - paths: default
+  - hydra: default
+  - experiment: null  # cocosearch18_tp | cocosearch18_ta | cocofreeview | mit1003
+  - logger: null  # set `logger=wandb` to log to Weights & Biases
+
+task_name: train
+tags: [dev]
+
+# Root folder containing the dataset folders and task_embeddings.npy.
+data_dir: ${paths.root_dir}/data
+
+# Resume training from a checkpoint (model, optimizer and epoch counter).
+ckpt_path: null
+
+seed: 0
+
+checkpoint:
+  _target_: src.callbacks.model_checkpoint.ModelCheckpoint
+  dirpath: ${paths.output_dir}/checkpoints
+  every_n_epochs: 50
+  save_last: true
+
+print_config: true

@@ -1,0 +1,10 @@
+cocosearch18_edf_ta:
+  _target_: src.data.components.cocosearch18.cocosearch18_edf_ta.COCOSearch18EDFTargetAbsentDataset
+  name: cocosearch18_edf_ta
+  root_path: ${data_dir}/cocosearch18_edf
+  split: test
+  task_embeddings_path: ${data_dir}/task_embeddings.npy
+  max_samples: ${data.max_samples}
+  # Human consistency scores used by the sequence-score metrics.
+  threshold: 0.353
+  threshold_no_dur: 0.377

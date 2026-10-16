@@ -1,0 +1,10 @@
+# @package _global_
+# MIT1003. Trained jointly on COCO-FreeView and MIT1003; the fixation index is concatenated in latent space.
+defaults:
+  - override /data/train_datasets: [cocofreeview_edf, mit1003_edf]
+  - override /data/test_datasets: [mit1003_edf]
+
+tags: [mit1003]
+
+model:
+  fixation_strategy: latent_space

@@ -1,0 +1,7 @@
+wandb:
+  _target_: src.logging.wandb_logger.WandbLogger
+  save_dir: ${paths.output_dir}
+  offline: false
+  id: null  # pass an existing run id to resume
+  project: ST-DiffEye
+  name: ${list_to_str:${tags}}

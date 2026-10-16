@@ -1,0 +1,5 @@
+# Repository root (set automatically from the location of `.project-root`).
+root_dir: ${oc.env:PROJECT_ROOT}
+log_dir: ${paths.root_dir}/logs
+# Created by hydra for each run, see configs/hydra/default.yaml.
+output_dir: ${hydra:runtime.output_dir}

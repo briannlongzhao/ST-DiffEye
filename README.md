@@ -34,15 +34,6 @@ Download the released checkpoints from Hugging Face into `checkpoints/`:
 hf download briannlongzhao/ST-DiffEye --local-dir checkpoints
 ```
 
-| Checkpoint | Benchmark | Experiment preset | Trained on | Fixation-index concatenation | Trajectory length |
-|---|---|---|---|---|---|
-| `COCOSearch18-TP.pt` | COCO-Search18, target present | `cocosearch18_tp` | COCO-Search18 TP + TA | raw data channel | 750 |
-| `COCOSearch18-TA.pt` | COCO-Search18, target absent | `cocosearch18_ta` | COCO-Search18 TA | raw data channel | 750 |
-| `COCOFreeView.pt` | COCO-FreeView | `cocofreeview` | COCO-FreeView + MIT1003 | raw data channel | 1500 |
-| `MIT1003.pt` | MIT1003 | `mit1003` | COCO-FreeView + MIT1003 | **latent space** | 750 |
-
-Each experiment preset (`configs/experiment/`) holds all the settings of its checkpoint, so commands only need the preset name.
-
 ## Data
 
 Datasets are organized in the following directory.

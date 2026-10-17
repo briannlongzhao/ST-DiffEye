@@ -1,10 +1,13 @@
 # ST-DiffEye
 
-Official code for **ST-DiffEye: Diffusion-based Continuous Gaze Generation via Joint Scanpath-Trajectory Modeling**.
+Code for **ST-DiffEye: Diffusion-based Continuous Gaze Generation via Joint Scanpath-Trajectory Modeling**.
 
-[Paper](https://arxiv.org/abs/2606.15486) · [Project page](https://st-diffeye.github.io/) · [Checkpoints](https://huggingface.co/briannlongzhao/ST-DiffEye)
+NeurIPS 2026
 
-ST-DiffEye is a diffusion model that generates continuous eye-tracking trajectories, conditioned on an image and an optional visual-search target. During training, each trajectory point is augmented with a continuous *fixation index* that aligns it with the human scanpath. At inference, the generated trajectories are converted to scanpaths with a fixation-detection algorithm and evaluated with CRPS-based and standard scanpath metrics.
+[arXiv](https://arxiv.org/abs/2606.15486) · [Project Page](https://st-diffeye.github.io/)
+
+TLDR: ST-DiffEye is a diffusion model that generates continuous eye-trajectoy and aligned scanpath conditioned on a visual stimuli and an optional search target, using a per-point fixation that ties each trajectory point to human scanpath.
+
 
 ## Installation
 
@@ -42,7 +45,9 @@ Each experiment preset (`configs/experiment/`) holds all the settings of its che
 
 ## Data
 
-Data download instructions will be added soon. All scripts read the datasets from one folder passed as `data_dir=/path/to/data`, with this layout:
+Datasets are organized in the following directory.
+
+Please consult the authors of COCO-Search18 and COCO-FreeView for access to raw trajectory data in EDF format.
 
 ```text
 data/
@@ -74,8 +79,6 @@ Every dataset has an experiment preset in `configs/experiment/` that holds all o
 
 ### COCO-Search18, target present
 
-Trained jointly on the target-present and target-absent training sets. The fixation index is concatenated to the trajectory as a raw input channel.
-
 ```bash
 # Train
 python src/train.py experiment=cocosearch18_tp data_dir=/path/to/data
@@ -84,8 +87,6 @@ python src/eval.py experiment=cocosearch18_tp data_dir=/path/to/data ckpt_path=c
 ```
 
 ### COCO-Search18, target absent
-
-Trained on the target-absent training set for 500 epochs. The fixation index is concatenated to the trajectory as a raw input channel.
 
 ```bash
 # Train
@@ -96,8 +97,6 @@ python src/eval.py experiment=cocosearch18_ta data_dir=/path/to/data ckpt_path=c
 
 ### COCO-FreeView
 
-Trained jointly on COCO-FreeView and MIT1003 with 1500-point trajectories (batch size 64). The fixation index is concatenated to the trajectory as a raw input channel.
-
 ```bash
 # Train
 python src/train.py experiment=cocofreeview data_dir=/path/to/data
@@ -107,41 +106,12 @@ python src/eval.py experiment=cocofreeview data_dir=/path/to/data ckpt_path=chec
 
 ### MIT1003
 
-Trained jointly on COCO-FreeView and MIT1003.
-
-> **Note:** unlike the other three datasets, MIT1003 uses **latent-space concatenation** of the fixation index (`model.fixation_strategy=latent_space`, set by the `mit1003` preset). The trajectory is first encoded into a 256-dimensional latent, and the fixation index is appended as a 257th latent channel instead of a 4th raw input channel. This works better on MIT1003, whose raw trajectories are noisier (see Appendix C.2 of the paper).
-
 ```bash
 # Train
 python src/train.py experiment=mit1003 data_dir=/path/to/data
 # Evaluate the released checkpoint
 python src/eval.py experiment=mit1003 data_dir=/path/to/data ckpt_path=checkpoints/MIT1003.pt
 ```
-
-### Outputs
-
-Training writes checkpoints every 50 epochs (`epoch_<E>.pt`) and after every epoch (`last.pt`) to `logs/train/<preset>_<date>_<time>/checkpoints/`. The released checkpoints are COCOSearch18-TP at epoch 250, COCOSearch18-TA at epoch 450, COCOFreeView at epoch 200 and MIT1003 at epoch 200. To evaluate your own model, use the same preset with `ckpt_path=<path to checkpoint>`.
-
-Evaluation writes to `logs/eval/<preset>_<date>_<time>/`:
-
-- `generations_epoch_<E>/generations_<Dataset>_test.pkl`: for every test stimulus, one generated sample per human viewer, as normalized `trajectories` (x, y, dt) and the extracted `scanpaths` (x, y, duration).
-- `generations_epoch_<E>/original_<Dataset>_test.pkl`: the human scanpaths.
-- `metrics_epoch_<E>/metrics_<Dataset>_test.json`: CRPS, Mean, Best and KLD values for every metric.
-
-### Options
-
-Append any of these to the commands above:
-
-| Option | Effect |
-|---|---|
-| `data.max_samples=100` | Use only the first 100 samples of each dataset (quick check). |
-| `seed=<int>` | Sampling / training seed (default `0`). |
-| `evaluation.data_to_extract=[preds]` | Only generate, without computing metrics. |
-| `evaluation.data_to_extract=[preds,metrics,qualitatives]` | Also draw the generated scanpaths on the images. |
-| `hydra.run.dir=<existing eval folder>` | Reuse the generations saved there and only recompute the metrics. |
-| `ckpt_path=<path to last.pt>` (training) | Resume training. |
-| `logger=wandb` (training) | Log losses to Weights & Biases. |
-| `data.batch_size_train=<int>` (training) | Change the batch size. The released models were trained on a single NVIDIA GH200 GPU; `cocofreeview` (1500-point trajectories, batch size 64) needs the most memory. |
 
 ## Citation
 

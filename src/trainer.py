@@ -26,8 +26,7 @@ class Trainer:
         start_epoch = 0
         if ckpt_path is not None:
             self.model_checkpoint.resume_checkpoint(model, self.opt, ckpt_path)
-            # global_epoch is incremented after each checkpoint is written.
-            start_epoch = self.model_checkpoint.global_epoch + 1
+            start_epoch = self.model_checkpoint.global_epoch
             log.info(f"Resumed from {ckpt_path} at epoch {start_epoch}")
 
         model.to(self.device)

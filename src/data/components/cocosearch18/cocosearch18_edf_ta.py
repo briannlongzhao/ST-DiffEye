@@ -31,15 +31,9 @@ class COCOSearch18EDFTargetAbsentDataset:
         def normalize_task_key(task_name):
             return str(task_name).replace(' ', '_')
 
-        # Using the already resized scanpath data provided by ScanDiff
-        if split in ['train', 'validation']:
-            with open(Path(self.root_path, 'coco_search18_fixations_TA_trainval.json'), 'rb') as f:
-                self.samples = json.load(f)
-
-            self.samples = [s for s in self.samples if s.get('split') == split]
-        else:
-            with open(Path(self.root_path, 'coco_search18_fixations_TA_test.json'), 'rb') as f:
-                self.samples = json.load(f)
+        # Using the scanpath data provided by ScanDiff (TA annotations are in the 1680x1050 screen frame)
+        with open(Path(self.root_path, f'coco_search18_fixations_TA_{split}.json'), 'rb') as f:
+            self.samples = json.load(f)
 
         sample_keys = [
             (s['name'], s['subject'], normalize_task_key(s['task']))

@@ -53,23 +53,24 @@ for d in images_tp/* images_ta/*; do
   c=$(basename "$d"); mkdir -p "images/${c//_/ }"; mv "$d"/* "images/${c//_/ }/"
 done
 rm -r images_tp images_ta
-wget http://vision.cs.stonybrook.edu/~cvlab_download/coco_search18_fixations_TA_trainval.json
 mv clusters_cocosearch18_tp_512_384.npy clusters_cocosearch18_edf_tp_512_384.npy
 mv clusters_cocosearch18_ta_512_384.npy clusters_cocosearch18_edf_ta_512_384.npy
 cd ../..
+rm -r scandiff_data data.zip  # the remaining osie/ folder is not used
 ```
 
-2. **COCO-Search18 and COCO-FreeView gaze recordings.** Request the raw EyeLink EDF files from the dataset authors and put them under `data/cocosearch18_edf/edfs/` and `data/cocofreeview_edf/edfs/`, keeping the original file names. Convert them to `.asc` with `edf2asc -input` from the [EyeLink Developers Kit](https://www.sr-research.com/support/thread-13.html) or with [EyeLink Data Viewer](https://www.sr-research.com/data-viewer/) (with the `-input` option). Our code parses the `.asc` files when the dataset is first loaded.
+2. **COCO-Search18 and COCO-FreeView gaze recordings.** Request the raw EyeLink EDF files from the dataset authors and put them under `data/cocosearch18_edf/edfs/` and `data/cocofreeview_edf/edfs/`, keeping the original file names. If you only received `.edf` files, convert them to `.asc` with `edf2asc -input` from the [EyeLink Developers Kit](https://www.sr-research.com/support/thread-13.html) or with [EyeLink Data Viewer](https://www.sr-research.com/data-viewer/) (with the `-input` option); skip this if the `.asc` files are already included. Our code parses the `.asc` files when the dataset is first loaded and caches the trajectories in `<dataset>/*_edf_cache.pkl` (this first load takes ~5 min for COCO-Search18 and ~15 min for COCO-FreeView; delete the cache to rebuild it).
 
 ```bash
 find data/cocosearch18_edf/edfs data/cocofreeview_edf/edfs -name "*.edf" -exec edf2asc -input {} \;
 ```
 
-3. **MIT1003 gaze recordings.**
+3. **MIT1003 gaze recordings.** Run this after step 1, which creates `data/mit1003_edf`.
 
 ```bash
 wget https://people.csail.mit.edu/tjudd/WherePeopleLook/DATA.zip
-unzip DATA.zip -d data/mit1003_edf
+unzip DATA.zip -d data/mit1003_edf -x "__MACOSX/*"
+rm DATA.zip
 ```
 
 Final layout:
@@ -79,7 +80,7 @@ data/
 ├── task_embeddings.npy
 ├── cocosearch18_edf/
 │   ├── coco_search18_fixations_TP_{train,validation,test}.json
-│   ├── coco_search18_fixations_TA_{trainval,test}.json
+│   ├── coco_search18_fixations_TA_{train,validation,test}.json
 │   ├── clusters_cocosearch18_edf_{tp,ta}_512_384.npy
 │   ├── images/<category>/
 │   ├── dinov2_base_timm_image_features_{tp,ta}/<category>/
@@ -102,6 +103,8 @@ data/
 ## Training and evaluation
 
 Every dataset has an experiment preset in `configs/experiment/` that holds all of its settings, so each command only needs the preset name, the data folder and, for evaluation, a checkpoint. `src/train.py` trains a model; `src/eval.py` generates trajectories and scanpaths for the test set with a checkpoint and computes the metrics.
+
+The default training batch sizes (128, or 64 for COCO-FreeView) need more than 24 GB of GPU memory. On smaller GPUs, lower it with `data.batch_size_train=...` (e.g. 32 for the COCO-Search18 and MIT1003 presets, 8 for COCO-FreeView on a 24 GB GPU).
 
 ### COCO-Search18, target present
 

@@ -66,7 +66,8 @@ class ModelCheckpoint:
                         state[k] = v.to(device)
 
         self.global_step = ckpt.get("global_step", 0)
-        self.global_epoch = ckpt.get("global_epoch", 0)
+        # The checkpoint stores the epoch it was saved at; training continues from the next one.
+        self.global_epoch = ckpt.get("global_epoch", 0) + 1
 
     def on_epoch_end(self, model, optimizer):
         if self.global_epoch % self.every_n_epochs == 0:

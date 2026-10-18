@@ -19,6 +19,7 @@ data_dir: ${paths.root_dir}/data
 # Checkpoint to evaluate (required).
 ckpt_path: ???
 
-seed: 0
+# Random seed for generation; null (default) gives different samples on every run.
+seed: null
 
 print_config: true

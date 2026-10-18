@@ -1,7 +1,7 @@
 cocosearch18_edf_ta:
   _target_: src.data.components.cocosearch18.cocosearch18_edf_ta.COCOSearch18EDFTargetAbsentDataset
   name: cocosearch18_edf_ta
-  root_path: ${data_dir}/cocosearch18_edf
+  root_path: ${data_dir}/cocosearch18
   split: train
   task_embeddings_path: ${data_dir}/task_embeddings.npy
   max_samples: ${data.max_samples}

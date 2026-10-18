@@ -14,11 +14,13 @@ from src.utils.check_fixations import check_fixations
 class COCOSearch18EDFTargetPresentDataset:
     def __init__(self, name: str, root_path: str, split: str, task_embeddings_path: str, threshold: float = -1.,
                  threshold_no_dur: float = -1., use_cache: bool = True, sample_rate: int = 1000,
-                 img_features_dir: str = 'dinov2_base_timm_image_features_tp', max_samples: int = -1,
+                 img_features_dir: str = 'dinov2_base_timm_image_features_tp', img_dir: str = 'images_tp',
+                 max_samples: int = -1,
                  head_align_distance_threshold_px: float = 10.0) -> None:
         self.name = name
         self.root_path = root_path
         self.use_cache = use_cache
+        self.img_dir = img_dir
         # Sequence-score similarity thresholds used by the evaluation metrics.
         self.threshold = threshold
         self.threshold_no_dur = threshold_no_dur
@@ -96,8 +98,8 @@ class COCOSearch18EDFTargetPresentDataset:
                 raw_x = np.asarray(trajectory['x'], dtype=np.float64)
                 raw_y = np.asarray(trajectory['y'], dtype=np.float64)
                 raw_t = np.asarray(trajectory['t'], dtype=np.float64)
-                task_folder = str(sample['task']).replace('_', ' ')
-                original_width, original_height = Image.open(Path(self.root_path, 'images', task_folder, sample['name'])).size
+                task_folder = normalize_task_key(sample['task'])
+                original_width, original_height = Image.open(Path(self.root_path, self.img_dir, task_folder, sample['name'])).size
                 raw_x = raw_x * (512 / original_width)
                 raw_y = raw_y * (320 / original_height)
                 raw_traj = self._as_trajectory(raw_x, raw_y, raw_t)
@@ -195,9 +197,8 @@ class COCOSearch18EDFTargetPresentDataset:
         if task_string == 'stop sign':
             task_string = 'stop_sign'
         
-        task_folder = task_string.replace('_', ' ')
         num_viewers = self.subject_per_img_per_task[f'{img_filename}_{task_string}']
-        original_img_size = Image.open(Path(self.root_path, 'images', task_folder, Path(img_filename))).size
+        original_img_size = Image.open(Path(self.root_path, self.img_dir, task_string, Path(img_filename))).size
         img_features_path = Path(self.root_path, self.img_features_dir, task_string, Path(img_filename).stem + '.pth')
         img_feats = torch.load(img_features_path).unsqueeze(0)
         

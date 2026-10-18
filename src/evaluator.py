@@ -3,7 +3,7 @@ import logging
 import os
 import pickle
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 import torch
@@ -25,8 +25,8 @@ SEARCH_DATASETS = ("cocosearch18_edf_tp", "cocosearch18_edf_ta")
 
 # Sequence-score cluster file, located in each dataset's root folder.
 CLUSTER_FILES = {
-    "cocosearch18_edf_tp": "clusters_cocosearch18_edf_tp_512_384.npy",
-    "cocosearch18_edf_ta": "clusters_cocosearch18_edf_ta_512_384.npy",
+    "cocosearch18_edf_tp": "clusters_cocosearch18_tp_512_384.npy",
+    "cocosearch18_edf_ta": "clusters_cocosearch18_ta_512_384.npy",
     "cocofreeview_edf": "clusters_coco_freeview_512_384.npy",
     "mit1003_edf": "clusters_mit1003_512_384.npy",
 }
@@ -103,7 +103,7 @@ class Evaluator:
         metrics_to_compute: List[str],
         data_to_extract: List[str],
         datamodule: UnifiedDataModule,
-        seed: int = 0,
+        seed: Optional[int] = None,
         scanpath_eval_max_len: int = 16,
         token_validity_threshold: float = 0.5,
     ) -> None:
@@ -164,8 +164,9 @@ class Evaluator:
         log.info(f"Generating test-set predictions (epoch {epoch})...")
         model.to(self.device)
         model.eval()
-        # Re-seed so generations do not depend on how many random numbers were used before.
-        seed_everything(self.seed)
+        if self.seed is not None:
+            # Re-seed so generations do not depend on how many random numbers were used before.
+            seed_everything(self.seed)
 
         target, preds = {}, {}
         data_loader = self.datamodule.test_dataloader()
@@ -238,12 +239,12 @@ class Evaluator:
 
         root_path = Path(self.eval_root_path, "qualitatives", self.dataset_tag)
         log.info(f"Saving qualitatives to {root_path}")
-        img_root = Path(self.dataset.root_path, "images")
+        img_root = Path(self.dataset.root_path, getattr(self.dataset, "img_dir", "images"))
         for key, data in preds.items():
             if isinstance(key, tuple):
                 img_name, task = key
                 dir_name = img_name.rsplit(".", 1)[0] + "_" + task
-                img_path = img_root / task.replace("_", " ") / img_name
+                img_path = img_root / task / img_name
             else:
                 dir_name = key.rsplit(".", 1)[0]
                 img_path = img_root / key

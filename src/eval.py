@@ -24,7 +24,8 @@ log = logging.getLogger(__name__)
 @hydra.main(version_base="1.3", config_path="../configs", config_name="eval.yaml")
 def main(cfg: DictConfig):
     extras(cfg)
-    seed_everything(cfg.seed)
+    if cfg.get("seed") is not None:
+        seed_everything(cfg.seed)
 
     datamodule = build_datamodule(cfg.data, test=True)
     model = hydra.utils.instantiate(cfg.model)

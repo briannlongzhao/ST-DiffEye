@@ -38,66 +38,20 @@ hf download briannlongzhao/ST-DiffEye --local-dir checkpoints
 
 We use [COCO-Search18](https://sites.google.com/view/cocosearch/), [COCO-FreeView](https://sites.google.com/view/cocosearch/coco-freeview) and [MIT1003](https://people.csail.mit.edu/tjudd/WherePeopleLook/index.html).
 
-1. **Scanpaths, images and features.** Download the [ScanDiff](https://github.com/aimagelab/ScanDiff) data release and arrange it as in the layout below:
-
 ```bash
-wget -O data.zip https://ailb-web.ing.unimore.it/publicfiles/ScanDiff_ICCV2025/data.zip
-unzip data.zip -d scandiff_data
-mkdir -p data
-mv scandiff_data/task_embeddings.npy data/
-mv scandiff_data/coco_freeview data/cocofreeview_edf
-mv scandiff_data/mit1003 data/mit1003_edf
-mv scandiff_data/cocosearch18 data/cocosearch18_edf
-cd data/cocosearch18_edf
-for d in images_tp/* images_ta/*; do
-  c=$(basename "$d"); mkdir -p "images/${c//_/ }"; mv "$d"/* "images/${c//_/ }/"
-done
-rm -r images_tp images_ta
-mv clusters_cocosearch18_tp_512_384.npy clusters_cocosearch18_edf_tp_512_384.npy
-mv clusters_cocosearch18_ta_512_384.npy clusters_cocosearch18_edf_ta_512_384.npy
-cd ../..
-rm -r scandiff_data data.zip  # the remaining osie/ folder is not used
-```
+# Scanpaths, images and image features from the ScanDiff data release
+wget https://ailb-web.ing.unimore.it/publicfiles/ScanDiff_ICCV2025/data.zip
+unzip data.zip -d data && rm data.zip
 
-2. **COCO-Search18 and COCO-FreeView gaze recordings.** Request the raw EyeLink EDF files from the dataset authors and put them under `data/cocosearch18_edf/edfs/` and `data/cocofreeview_edf/edfs/`, keeping the original file names. If you only received `.edf` files, convert them to `.asc` with `edf2asc -input` from the [EyeLink Developers Kit](https://www.sr-research.com/support/thread-13.html) or with [EyeLink Data Viewer](https://www.sr-research.com/data-viewer/) (with the `-input` option); skip this if the `.asc` files are already included. Our code parses the `.asc` files when the dataset is first loaded and caches the trajectories in `<dataset>/*_edf_cache.pkl` (this first load takes ~5 min for COCO-Search18 and ~15 min for COCO-FreeView; delete the cache to rebuild it).
-
-```bash
-find data/cocosearch18_edf/edfs data/cocofreeview_edf/edfs -name "*.edf" -exec edf2asc -input {} \;
-```
-
-3. **MIT1003 gaze recordings.** Run this after step 1, which creates `data/mit1003_edf`.
-
-```bash
+# MIT1003 gaze recordings
 wget https://people.csail.mit.edu/tjudd/WherePeopleLook/DATA.zip
-unzip DATA.zip -d data/mit1003_edf -x "__MACOSX/*"
-rm DATA.zip
+unzip DATA.zip -d data/mit1003 && rm DATA.zip
 ```
 
-Final layout:
+For COCO-Search18 and COCO-FreeView, request the raw EyeLink `.edf` gaze recordings from the dataset authors, put them under `data/cocosearch18/edfs/` and `data/coco_freeview/edfs/`, and convert them to `.asc` with `edf2asc` from the [EyeLink Developers Kit](https://www.sr-research.com/support/thread-13.html):
 
-```text
-data/
-├── task_embeddings.npy
-├── cocosearch18_edf/
-│   ├── coco_search18_fixations_TP_{train,validation,test}.json
-│   ├── coco_search18_fixations_TA_{train,validation,test}.json
-│   ├── clusters_cocosearch18_edf_{tp,ta}_512_384.npy
-│   ├── images/<category>/
-│   ├── dinov2_base_timm_image_features_{tp,ta}/<category>/
-│   ├── SemSS/
-│   └── edfs/**/*.asc
-├── cocofreeview_edf/
-│   ├── COCOFreeView_fixations_{train,validation,test}.json
-│   ├── clusters_coco_freeview_512_384.npy
-│   ├── images/
-│   ├── dinov2_base_timm_image_features/
-│   └── edfs/**/*.asc
-└── mit1003_edf/
-    ├── mit1003_fixations_{train,validation,test}.json
-    ├── clusters_mit1003_512_384.npy
-    ├── images/
-    ├── dinov2_base_timm_image_features/
-    └── DATA/<subject>/*.mat
+```bash
+find data/cocosearch18/edfs data/coco_freeview/edfs -name "*.edf" -exec edf2asc -input {} \;
 ```
 
 ## Training and evaluation
@@ -141,6 +95,24 @@ python src/train.py experiment=mit1003 data_dir=/path/to/data
 # Evaluate the released checkpoint
 python src/eval.py experiment=mit1003 data_dir=/path/to/data ckpt_path=checkpoints/MIT1003.pt
 ```
+
+## Demo
+
+`src/demo.py` generates trajectories and scanpaths for a single image with a released checkpoint, and saves a figure with the trajectories (left) and scanpaths (right) overlaid on the image. It needs the checkpoints and `data/task_embeddings.npy` from the data release.
+
+```bash
+# Visual search: target present / target absent
+python src/demo.py --image path/to/image.jpg --task cocosearch18_tp --target clock
+python src/demo.py --image path/to/image.jpg --task cocosearch18_ta --target "potted plant"
+# Free viewing
+python src/demo.py --image path/to/image.jpg --task cocofreeview
+python src/demo.py --image path/to/image.jpg --task mit1003
+```
+
+- `--task`: `cocosearch18_tp`, `cocosearch18_ta`, `cocofreeview` or `mit1003`; selects the checkpoint in `checkpoints/` (override with `--ckpt`).
+- `--target`: search target for `cocosearch18_tp`/`cocosearch18_ta`, one of `bottle`, `bowl`, `car`, `chair`, `clock`, `cup`, `fork`, `keyboard`, `knife`, `laptop`, `microwave`, `mouse`, `oven`, `potted plant`, `sink`, `stop sign`, `toilet`, `tv`.
+- `--num_samples`: number of generated samples (default 10); `--seed`: random seed for reproducible samples (default: none, so every run differs).
+- `--out`: output figure (default `<image name>_<task>[_<target>].png` in the current folder).
 
 ## Citation
 
